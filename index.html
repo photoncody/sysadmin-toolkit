@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysAdmin Toolkit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { gray: { 850: '#1f2937', 900: '#111827' } } } } }
+    </script>
+    <style>
+        .tool-section { display: none; }
+        .tool-section.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans h-screen flex overflow-hidden">
+
+    <aside class="w-64 bg-gray-850 border-r border-gray-700 flex flex-col">
+        <div class="p-6">
+            <h1 class="text-xl font-bold text-blue-400">SysAdmin Toolkit</h1>
+        </div>
+        <nav class="flex-1 px-4 space-y-2 overflow-y-auto" id="nav-links">
+            <button data-target="subnet" class="w-full text-left px-4 py-2 rounded bg-blue-600 text-white font-medium hover:bg-blue-500 transition">Subnet Calculator</button>
+            <button data-target="mac" class="w-full text-left px-4 py-2 rounded hover:bg-gray-700 transition">MAC Normalizer</button>
+            <button data-target="run2compose" class="w-full text-left px-4 py-2 rounded hover:bg-gray-700 transition">Docker Run ➔ Compose</button>
+            <button data-target="compose2run" class="w-full text-left px-4 py-2 rounded hover:bg-gray-700 transition">Compose ➔ Docker Run</button>
+            <button data-target="qr" class="w-full text-left px-4 py-2 rounded hover:bg-gray-700 transition">QR Code Generator</button>
+            <button data-target="base64" class="w-full text-left px-4 py-2 rounded hover:bg-gray-700 transition">Base64 Encode/Decode</button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto relative">
+        <div id="toast" class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none z-50">Copied to clipboard!</div>
+
+        <section id="subnet" class="tool-section active max-w-2xl mx-auto">
+            <h2 class="text-2xl font-semibold mb-4">Subnet Calculator</h2>
+            <div class="mb-4">
+                <label class="block text-sm text-gray-400 mb-1">Enter IP with CIDR or Mask (e.g. 192.168.0.10/24)</label>
+                <input type="text" id="subnet-input" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-blue-500" placeholder="192.168.0.10/24">
+            </div>
+            <div class="flex space-x-4 mb-6">
+                <button id="calc-subnet" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded primary-action">Calculate</button>
+                <button class="btn-reset bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Clear</button>
+            </div>
+            <div class="bg-gray-800 rounded p-4 border border-gray-700 relative">
+                <button class="absolute top-2 right-2 text-gray-400 hover:text-white copy-btn" data-copy-target="subnet-output">📋 Copy</button>
+                <pre id="subnet-output" class="text-sm text-green-400 whitespace-pre-wrap">Awaiting input...</pre>
+            </div>
+        </section>
+
+        <section id="mac" class="tool-section max-w-2xl mx-auto">
+            <h2 class="text-2xl font-semibold mb-4">MAC Address Normalizer</h2>
+            <div class="mb-4">
+                <label class="block text-sm text-gray-400 mb-1">Enter MAC Address in any format</label>
+                <input type="text" id="mac-input" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-blue-500" placeholder="0011.2233.4455 or 001122334455">
+            </div>
+            <div class="flex space-x-4 mb-6">
+                <button id="norm-mac" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded primary-action">Normalize</button>
+                <button class="btn-reset bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Clear</button>
+            </div>
+            <div class="bg-gray-800 rounded p-4 border border-gray-700 relative">
+                <button class="absolute top-2 right-2 text-gray-400 hover:text-white copy-btn" data-copy-target="mac-output">📋 Copy</button>
+                <pre id="mac-output" class="text-sm text-green-400 whitespace-pre-wrap">Awaiting input...</pre>
+            </div>
+        </section>
+
+        <section id="run2compose" class="tool-section max-w-4xl mx-auto">
+            <h2 class="text-2xl font-semibold mb-4">Docker Run to Docker Compose</h2>
+            <textarea id="dr-input" class="w-full h-32 bg-gray-800 border border-gray-700 rounded p-2 text-white mb-4 focus:outline-none focus:border-blue-500 font-mono text-sm" placeholder="docker run -d --name myapp -p 80:80 nginx:latest"></textarea>
+            <div class="flex space-x-4 mb-6">
+                <button id="btn-run2compose" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded primary-action">Convert to Compose (Ctrl+Enter)</button>
+                <button class="btn-reset bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Clear</button>
+            </div>
+            <div class="bg-gray-800 rounded p-4 border border-gray-700 relative">
+                <button class="absolute top-2 right-2 text-gray-400 hover:text-white copy-btn" data-copy-target="compose-output">📋 Copy</button>
+                <pre id="compose-output" class="text-sm text-green-400 whitespace-pre-wrap font-mono">Awaiting input...</pre>
+            </div>
+        </section>
+
+        <section id="compose2run" class="tool-section max-w-4xl mx-auto">
+            <h2 class="text-2xl font-semibold mb-4">Docker Compose to Docker Run</h2>
+            <textarea id="dc-input" class="w-full h-48 bg-gray-800 border border-gray-700 rounded p-2 text-white mb-4 focus:outline-none focus:border-blue-500 font-mono text-sm" placeholder="version: '3'&#10;services:&#10;  web:&#10;    image: nginx:latest&#10;    ports:&#10;      - '80:80'"></textarea>
+            <div class="flex space-x-4 mb-6">
+                <button id="btn-compose2run" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded primary-action">Convert to Docker Run (Ctrl+Enter)</button>
+                <button class="btn-reset bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Clear</button>
+            </div>
+            <div class="bg-gray-800 rounded p-4 border border-gray-700 relative">
+                <button class="absolute top-2 right-2 text-gray-400 hover:text-white copy-btn" data-copy-target="run-output">📋 Copy</button>
+                <pre id="run-output" class="text-sm text-green-400 whitespace-pre-wrap font-mono">Awaiting input...</pre>
+            </div>
+        </section>
+
+        <section id="qr" class="tool-section max-w-2xl mx-auto">
+            <h2 class="text-2xl font-semibold mb-4">QR Code Generator</h2>
+            <input type="text" id="qr-input" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white mb-4 focus:outline-none focus:border-blue-500" placeholder="https://google.com">
+            <div class="flex space-x-4 mb-6">
+                <button id="btn-qr" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded primary-action">Generate</button>
+                <button class="btn-reset bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Clear</button>
+            </div>
+            <div class="bg-gray-800 rounded p-4 border border-gray-700 flex flex-col items-center justify-center min-h-[150px]">
+                <div id="qr-output" class="bg-white p-4 rounded mt-4 mb-4 hidden"></div>
+                <span class="text-sm text-green-400 placeholder-text">Awaiting input...</span>
+            </div>
+        </section>
+
+        <section id="base64" class="tool-section max-w-3xl mx-auto">
+            <h2 class="text-2xl font-semibold mb-4">Base64 Encoder / Decoder</h2>
+            <textarea id="b64-input" class="w-full h-32 bg-gray-800 border border-gray-700 rounded p-2 text-white mb-4 focus:outline-none focus:border-blue-500 font-mono text-sm" placeholder="Enter text here..."></textarea>
+            <div class="flex space-x-4 mb-6">
+                <button id="btn-b64-enc" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded primary-action">Encode (Ctrl+Enter)</button>
+                <button id="btn-b64-dec" class="bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded">Decode</button>
+                <button class="btn-reset bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Clear</button>
+            </div>
+            <div class="bg-gray-800 rounded p-4 border border-gray-700 relative">
+                <button class="absolute top-2 right-2 text-gray-400 hover:text-white copy-btn" data-copy-target="b64-output">📋 Copy</button>
+                <pre id="b64-output" class="text-sm text-green-400 whitespace-pre-wrap font-mono">Awaiting input...</pre>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
